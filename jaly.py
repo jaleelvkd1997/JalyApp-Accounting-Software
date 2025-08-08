@@ -1,7 +1,11 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
 import sqlite3
 import datetime
+
+# Set appearance
+ctk.set_appearance_mode("light")  # or "dark"
+ctk.set_default_color_theme("blue")  # also: "green", "dark-blue"
 
 # ----------- Database Setup -----------
 def create_table():
@@ -22,17 +26,16 @@ def create_table():
 # ----------- Save Transaction -----------
 def save_transaction():
     t_date = date_entry.get()
-    t_type = type_combobox.get()
+    t_type = type_option.get()
     t_amount = amount_entry.get()
     t_desc = desc_entry.get()
 
-    # Validate input
     if not t_date or not t_type or not t_amount:
         messagebox.showwarning("Missing Info", "Please fill in all fields.")
         return
 
     try:
-        float(t_amount)  # check amount is number
+        float(t_amount)
     except:
         messagebox.showerror("Invalid", "Amount must be a number.")
         return
@@ -45,52 +48,87 @@ def save_transaction():
     conn.close()
     messagebox.showinfo("Saved", "Transaction saved successfully!")
 
-    # Clear inputs
-    date_entry.delete(0, tk.END)
-    amount_entry.delete(0, tk.END)
-    desc_entry.delete(0, tk.END)
-    type_combobox.set("")
+    date_entry.delete(0, ctk.END)
+    amount_entry.delete(0, ctk.END)
+    desc_entry.delete(0, ctk.END)
+    type_option.set("")
 
-# ----------- UI Setup -----------
-window = tk.Tk()
-window.title("Jaly Accounting Software")
-window.geometry("500x500")
-window.config(bg="#f8f8f8")
+# ----------- View Transactions -----------
+def view_transactions():
+    view_win = ctk.CTkToplevel(app)
+    view_win.title("All Transactions")
+    view_win.geometry("700x400")
 
-title = tk.Label(window, text="Add Transaction", font=("Arial", 16, "bold"), bg="#f8f8f8")
+    # Treeview with scrollbar
+    import tkinter.ttk as ttk  # only for Treeview
+    import tkinter as tk  # only for scrollbar
+
+    cols = ("ID", "Date", "Type", "Amount", "Description")
+    tree = ttk.Treeview(view_win, columns=cols, show="headings")
+    for col in cols:
+        tree.heading(col, text=col)
+        tree.column(col, anchor="center", width=120)
+
+    tree.pack(side="left", fill="both", expand=True)
+
+    scrollbar = tk.Scrollbar(view_win, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=scrollbar.set)
+    scrollbar.pack(side="right", fill="y")
+
+    # Get data from DB
+    conn = sqlite3.connect("jaly_data.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM transactions")
+    rows = cursor.fetchall()
+    conn.close()
+
+    for row in rows:
+        tree.insert("", "end", values=row)
+
+# ----------- App Window -----------
+app = ctk.CTk()
+app.title("Jaly Accounting Software")
+app.geometry("500x600")
+
+# Title
+title = ctk.CTkLabel(app, text="💼 Jaly Accounting", font=ctk.CTkFont(size=22, weight="bold"))
 title.pack(pady=20)
 
 # Date
-date_label = tk.Label(window, text="Date (YYYY-MM-DD):", bg="#f8f8f8")
+date_label = ctk.CTkLabel(app, text="Date (YYYY-MM-DD):")
 date_label.pack()
-date_entry = tk.Entry(window)
-date_entry.insert(0, datetime.date.today().strftime("%Y-%m-%d"))  # default today's date
+date_entry = ctk.CTkEntry(app)
+date_entry.insert(0, datetime.date.today().strftime("%Y-%m-%d"))
 date_entry.pack(pady=5)
 
 # Type
-type_label = tk.Label(window, text="Type:", bg="#f8f8f8")
+type_label = ctk.CTkLabel(app, text="Type:")
 type_label.pack()
-type_combobox = ttk.Combobox(window, values=["Income", "Expense"])
-type_combobox.pack(pady=5)
+type_option = ctk.CTkOptionMenu(app, values=["Income", "Expense"])
+type_option.pack(pady=5)
 
 # Amount
-amount_label = tk.Label(window, text="Amount:", bg="#f8f8f8")
+amount_label = ctk.CTkLabel(app, text="Amount:")
 amount_label.pack()
-amount_entry = tk.Entry(window)
+amount_entry = ctk.CTkEntry(app)
 amount_entry.pack(pady=5)
 
 # Description
-desc_label = tk.Label(window, text="Description:", bg="#f8f8f8")
+desc_label = ctk.CTkLabel(app, text="Description:")
 desc_label.pack()
-desc_entry = tk.Entry(window)
+desc_entry = ctk.CTkEntry(app)
 desc_entry.pack(pady=5)
 
 # Save Button
-save_button = tk.Button(window, text="Save Transaction", command=save_transaction, bg="#4CAF50", fg="white", padx=10, pady=5)
-save_button.pack(pady=20)
+save_btn = ctk.CTkButton(app, text="💾 Save Transaction", command=save_transaction)
+save_btn.pack(pady=15)
 
-# Run DB Setup
+# View Button
+view_btn = ctk.CTkButton(app, text="📄 View Transactions", command=view_transactions)
+view_btn.pack(pady=5)
+
+# Initialize DB
 create_table()
 
-# Start the app
-window.mainloop()
+# Run App
+app.mainloop()
