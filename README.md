@@ -28,3 +28,15 @@ Step 3 — View All Transactions
 Use Treeview from tkinter.ttk to show table with rows and columns
  Step 3.5: Make the UI Prettier Using CustomTkinter
 pip install customtkinter
+
+
+Save the logo
+Save the file you just got as logo.png (keep it a PNG for transparency).
+
+Place it in the same folder as jaly.py and jaly_main.py.
+
+Step 2 – Install Pillow (if not already)
+This library lets us use the image in CustomTkinter:
+
+
+pip install pillow
