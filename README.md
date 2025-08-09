@@ -40,3 +40,4 @@ This library lets us use the image in CustomTkinter:
 
 
 pip install pillow
+pip install matplotlib
