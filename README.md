@@ -45,5 +45,35 @@ pip install matplotlib
 
 MAking exe file
 pip install pyinstaller
+way one without logo
 From your project folder (where your jaly.py or jaly_main.py is), run:
 pyinstaller --noconsole --onefile --icon=logo.ico jaly.py
+way 2 with logo
+pyinstaller jaly.py --onefile --noconsole
+2️⃣ Edit jaly.spec
+Open jaly.spec and find this part:
+
+a = Analysis(
+    ['jaly.py'],
+    pathex=[],
+    binaries=[],
+    datas=[],
+We will change it so datas includes your files:
+
+a = Analysis(
+    ['jaly.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+        ('logo.png', '.'),       # logo file
+        ('*.png', '.'),          # any other PNGs
+    ],
+
+3️⃣ Build the .exe from the .spec
+Once you save jaly.spec, run:
+
+pyinstaller jaly.spec
+Your updated .exe will be in:
+
+dist/jaly.exe
+and will have the logo included.
