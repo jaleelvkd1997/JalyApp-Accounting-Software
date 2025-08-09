@@ -41,3 +41,9 @@ This library lets us use the image in CustomTkinter:
 
 pip install pillow
 pip install matplotlib
+
+
+MAking exe file
+pip install pyinstaller
+From your project folder (where your jaly.py or jaly_main.py is), run:
+pyinstaller --noconsole --onefile --icon=logo.ico jaly.py
